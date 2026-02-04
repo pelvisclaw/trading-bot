@@ -7,7 +7,7 @@ import json
 import sys
 sys.path.insert(0, 'src')
 
-from strategies.genetic_trader_enhanced import GeneticTrader
+from strategies.genetic_trader_enhanced import GeneticTrader, StrategyGenes
 
 def main():
     parser = argparse.ArgumentParser(description='Train Genetic Algorithm Trading System')
@@ -23,11 +23,14 @@ def main():
     trader = GeneticTrader(args.api_key, args.private_key)
     genes = trader.train(args.generations)
     
+    # Get fitness from GA history
+    best_fitness = trader.history[-1]['best_fitness'] if trader.history else 0
+    
     # Save strategy
     strategy_data = {
         'strategy': 'genetic_enhanced',
         'genes': vars(genes),
-        'fitness': trader.best_fitness,
+        'fitness': best_fitness,
         'pair': args.pair,
         'candles': args.candles
     }
@@ -36,7 +39,8 @@ def main():
         json.dump(strategy_data, f, indent=2)
     
     print(f"✅ Saved best strategy to {args.output}")
-    print(f"📈 Best fitness: {trader.best_fitness:.2f}")
+    print(f"📈 Best fitness: {best_fitness:.2f}")
+    print(f"🔧 Strategy genes: {json.dumps(vars(genes), indent=2)}")
 
 if __name__ == '__main__':
     main()
