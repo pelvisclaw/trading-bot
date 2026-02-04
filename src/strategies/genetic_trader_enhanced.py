@@ -659,8 +659,9 @@ class GeneticTrader:
         print(f"Training on {sum(len(d) for d in ohlc_data.values())} total candles...")
         self.best_strategy = self.ga.evolve(ohlc_data, generations)
         
-        print(f"\nBest strategy found (complexity: {self.best_strategy[2].complexity()}):")
-        print(json.dumps(self.best_strategy[2].to_dict(), indent=2, default=str))
+        print(f"\nBest strategy found (complexity: {self.best_strategy.complexity()}):")
+        genes = self.best_strategy[2] if isinstance(self.best_strategy, tuple) else self.best_strategy
+        print(json.dumps(genes.to_dict(), indent=2, default=str))
         
         return self.best_strategy
     
