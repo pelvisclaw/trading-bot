@@ -326,10 +326,10 @@ class Backtester:
         self.config = StrategyConfig()
     
     def fetch_multi_timeframe(self, pair: str = "SOLUSD") -> Dict[int, List]:
-        """Fetch OHLC for multiple timeframes"""
+        """Fetch OHLC for multiple timeframes - extended history"""
         data = {}
         for interval in [60, 240, 1440]:
-            result = self.api.get_ohlc(pair, interval, 1000)  # Increased to 1000
+            result = self.api.get_ohlc(pair, interval, 2000)  # Extended to 2000 for ~90 days
             if 'result' in result and len(result['result']) > 1:
                 data[interval] = list(result['result'].values())[0]
         return data

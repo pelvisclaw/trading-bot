@@ -1,0 +1,44 @@
+name: Regime Paper Trading
+
+on:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '*/5 * * * *'  # Every 5 minutes
+
+jobs:
+  paper-trade:
+    runs-on: ubuntu-latest
+    
+    env:
+      KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
+      KRAKEN_PRIVATE_KEY: ${{ secrets.KRAKEN_PRIVATE_KEY }}
+      CAPITAL: ${{ secrets.PAPER_CAPITAL | default('10000') }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: pip install requests
+    
+    - name: Run paper trader
+      run: |
+        echo "=== Regime Paper Trader ==="
+        echo "Time: $(date)"
+        python scripts/paper_trader_regime.py \
+          --api-key "$KRAKEN_API_KEY" \
+          --api-secret "$KRAKEN_PRIVATE_KEY" \
+          --capital $CAPITAL
+    
+    - name: Upload trade log
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: paper-trade-log
+        path: paper_trading.log
+        retention-days: 1
