@@ -51,7 +51,7 @@ jobs:
           --api-key "$KRAKEN_API_KEY" \
           --private-key "$KRAKEN_PRIVATE_KEY" \
           --strategy best_strategy.json \
-          --paper \
+          --candles 500 \
           --output paper_results.json
     
     - name: Upload results
