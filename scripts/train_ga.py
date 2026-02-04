@@ -24,7 +24,7 @@ def main():
     genes = trader.train(args.generations)
     
     # Get fitness from GA history
-    best_fitness = trader.history[-1]['best_fitness'] if trader.history else 0
+    best_fitness = trader.ga.history[-1]['best_fitness'] if trader.ga.history else 0
     
     # Save strategy
     strategy_data = {
