@@ -29,7 +29,7 @@ def main():
     # Save strategy
     strategy_data = {
         'strategy': 'genetic_enhanced',
-        'genes': vars(genes),
+        'genes': genes.to_dict(),
         'fitness': best_fitness,
         'pair': args.pair,
         'candles': args.candles
