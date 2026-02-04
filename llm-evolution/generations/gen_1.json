@@ -1,0 +1,57 @@
+{
+  "generation": 1,
+  "timestamp": "2026-02-04T18:33:12.408630",
+  "agents": [
+    {
+      "name": "volatility_v1",
+      "fitness": 740.4574063664426,
+      "backtest": {
+        "trades": 4,
+        "win_rate": 0.5,
+        "avg_pnl": 0.05342612434702655,
+        "sharpe": 7.275584832269082,
+        "max_dd": 0.12101076860465745,
+        "total_return": 0.20154963969565376
+      }
+    },
+    {
+      "name": "mean_reversion_v1",
+      "fitness": 401.70646464376966,
+      "backtest": {
+        "trades": 10,
+        "win_rate": 0.6,
+        "avg_pnl": 0.014486297818794666,
+        "sharpe": 3.838075415042354,
+        "max_dd": 0.12101076860465745,
+        "total_return": 0.13474781513671763
+      }
+    },
+    {
+      "name": "breakout_v1",
+      "fitness": 323.93063256767925,
+      "backtest": {
+        "trades": 9,
+        "win_rate": 0.3333333333333333,
+        "avg_pnl": 0.014468582810852677,
+        "sharpe": 3.1687793153477837,
+        "max_dd": 0.09613965633765803,
+        "total_return": 0.11321106999791386
+      }
+    },
+    {
+      "name": "volatili_g1_0",
+      "fitness": 0,
+      "backtest": {}
+    },
+    {
+      "name": "mean_rev_g1_1",
+      "fitness": 0,
+      "backtest": {}
+    },
+    {
+      "name": "volatili_g1_2",
+      "fitness": 0,
+      "backtest": {}
+    }
+  ]
+}
