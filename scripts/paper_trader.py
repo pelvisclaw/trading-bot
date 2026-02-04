@@ -7,14 +7,14 @@ import json
 import sys
 sys.path.insert(0, 'src')
 
-from strategies.genetic_trader_enhanced import GeneticTrader, StrategyGenes
+from strategies.genetic_trader_enhanced import GeneticTrader, StrategyGenes, KrakenAPI
 
 def main():
     parser = argparse.ArgumentParser(description='Paper Trading Validation')
     parser.add_argument('--api-key', required=True)
     parser.add_argument('--private-key', required=True)
     parser.add_argument('--strategy', required=True)
-    parser.add_argument('--paper', action='store_true', help='Run in paper mode')
+    parser.add_argument('--candles', type=int, default=500, help='Number of candles to fetch')
     parser.add_argument('--output', default='paper_results.json')
     
     args = parser.parse_args()
@@ -28,11 +28,14 @@ def main():
     print(f"Base position size: {genes.base_position_size}")
     print(f"Stop loss: {genes.base_stop_loss}, Take profit: {genes.base_take_profit}")
     
-    # For paper trading, we just validate on recent data
-    trader = GeneticTrader(args.api_key, args.private_key)
-    
-    # Fetch recent data
-    ohlc_data = trader.fetch_ohlc_multi()
+    # Fetch more candles for better validation
+    api = KrakenAPI()
+    result = api.get_ohlc('SOLUSD', 60, args.candles)
+    ohlc_data = {}
+    if 'result' in result:
+        data = list(result['result'].values())[0]
+        ohlc_data['SOLUSD'] = data
+        print(f"Fetched {len(data)} candles: {data[0][4]} -> {data[-1][4]}")
     
     if not ohlc_data:
         print("Error: Failed to fetch OHLC data")

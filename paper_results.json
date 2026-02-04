@@ -1,0 +1,10 @@
+{
+  "SOLUSD": {
+    "fitness": 57.28700623700632,
+    "trades": 1,
+    "pnl": 0.6237006237006313,
+    "sharpe": 0,
+    "win_rate": 1.0,
+    "max_drawdown": 0
+  }
+}
