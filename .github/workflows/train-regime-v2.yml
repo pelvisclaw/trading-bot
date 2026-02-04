@@ -1,0 +1,52 @@
+name: Train Regime-Aware Trading System v2
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */12 * * *'
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/train_regime_v2.py'
+      - 'src/strategies/regime_ensemble_v2.py'
+      - '.github/workflows/train-regime-v2.yml'
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    
+    env:
+      KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
+      KRAKEN_PRIVATE_KEY: ${{ secrets.KRAKEN_PRIVATE_KEY }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: pip install requests numpy
+    
+    - name: Train regime-aware system v2
+      run: |
+        python scripts/train_regime_v2.py \
+          --api-key "$KRAKEN_API_KEY" \
+          --private-key "$KRAKEN_PRIVATE_KEY" \
+          --pair SOLUSD \
+          --output regime_strategy_v2.json
+    
+    - name: Upload results
+      uses: actions/upload-artifact@v4
+      with:
+        name: regime-results-v2
+        path: regime_strategy_v2.json
+        retention-days: 7
+    
+    - name: Print results summary
+      run: |
+        echo "## Regime-Aware Training v2 Complete"
+        cat regime_strategy_v2.json
