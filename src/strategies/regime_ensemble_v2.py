@@ -178,13 +178,13 @@ class TrendStrategy:
 
 
 class VolatilityStrategy:
-    """Volatility breakout using Bollinger Bands"""
+    """Enhanced volatility breakout using Bollinger Bands + ATR"""
     
     def __init__(self, config: StrategyConfig):
         self.config = config
     
     def generate_signal(self, regimes: Dict[int, Dict], prices: Dict[int, List[float]]) -> str:
-        """Generate signal based on Bollinger Band breakout"""
+        """Generate signal based on Bollinger Band breakout with ATR confirmation"""
         if 60 not in prices or len(prices[60]) < 50:
             return 'neutral'
         
@@ -193,15 +193,36 @@ class VolatilityStrategy:
         
         price = closes[-1]
         atr = Indicators.atr(
-            [c * 1.02 for c in closes[-20:]],  # synthetic highs
-            [c * 0.98 for c in closes[-20:]],  # synthetic lows
+            [c * 1.02 for c in closes[-20:]],
+            [c * 0.98 for c in closes[-20:]],
             closes, 14
         )
+        
+        # ATR as percentage of price
+        atr_pct = atr / price
         
         # Volatility regime
         vol_regime = regimes.get(60, {}).get('regime', 'unknown')
         
-        # Breakout long: price closes above upper band
+        # Band position: where is price relative to bands?
+        band_width = upper - lower
+        band_position = (price - lower) / band_width if band_width > 0 else 0.5
+        
+        # Breakout long: price closes above upper band + ATR confirms
+        if price > upper and vol_regime in ['high_vol', 'bull', 'sideways']:
+            return 'long'
+        
+        # Breakout short: price closes below lower band + ATR confirms
+        if price < lower and vol_regime in ['high_vol', 'bear', 'sideways']:
+            return 'short'
+        
+        # Volatility compression signal (prepare for breakout)
+        # Low ATR + narrow bands = impending move
+        if atr_pct < 0.015 and band_width < price * 0.03:
+            # Compression - expect breakout soon, don't trade yet
+            return 'neutral'
+        
+        return 'neutral'
         if price > upper and vol_regime in ['high_vol', 'bull', 'sideways']:
             return 'long'
         
