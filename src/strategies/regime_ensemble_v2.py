@@ -298,13 +298,19 @@ class KrakenAPI:
             headers = {'API-Key': self.api_key, 'API-Sign': signature}
         
         try:
-            response = self.session.get(url, headers=headers, timeout=5)
+            if public and data:
+                response = self.session.get(url, params=data, headers=headers, timeout=5)
+            else:
+                response = self.session.get(url, headers=headers, timeout=5)
             return response.json()
         except Exception as e:
             return {'error': str(e)}
     
     def get_ohlc(self, pair: str = "SOLUSD", interval: int = 60, count: int = 200) -> Dict:
-        return self._request(f"/public/OHLC", {"pair": pair, "interval": interval}, public=True)
+        params = {"pair": pair, "interval": interval}
+        if count:
+            params["since"] = 0  # Get recent data
+        return self._request(f"/public/OHLC", params, public=True)
 
 
 # ============ BACKTEST ============
