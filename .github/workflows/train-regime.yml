@@ -29,48 +29,24 @@ jobs:
         python-version: '3.10'
     
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests numpy pandas
+      run: pip install requests numpy pandas
     
     - name: Train regime-aware system
       run: |
-        echo "Starting regime-aware multi-timeframe training..."
         python scripts/train_regime.py \
           --api-key "$KRAKEN_API_KEY" \
           --private-key "$KRAKEN_PRIVATE_KEY" \
           --pair SOLUSD \
           --output regime_strategy.json
-        
+    
     - name: Upload results
       uses: actions/upload-artifact@v4
       with:
         name: regime-results
-        path: |
-          regime_strategy.json
+        path: regime_strategy.json
         retention-days: 7
     
-    - name: Create results summary
+    - name: Print results summary
       run: |
-        echo "## Regime-Aware Training Results" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "- Generated: $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "- Strategy: Multi-Timeframe Ensemble" >> $GITHUB_STEP_SUMMARY
-        echo "- Timeframes: 1h, 4h, 24h" >> $GITHUB_STEP_SUMMARY
-        echo "- Components: Trend + Volatility + Mean Reversion" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f "regime_strategy.json" ]; then
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Performance" >> $GITHUB_STEP_SUMMARY
-          python3 -c "
-import json
-with open('regime_strategy.json') as f:
-    data = json.load(f)
-bt = data.get('backtest', {})
-print(f\"Trades: {bt.get('trades', 'N/A')}\")
-print(f\"Win Rate: {bt.get('win_rate', 0):.1%}\")
-print(f\"Avg PnL: {bt.get('avg_pnl', 0):.2%}\")
-print(f\"Max DD: {bt.get('max_dd', 0):.1%}\")
-print(f\"Sharpe: {bt.get('sharpe', 0):.2f}\")
-" >> $GITHUB_STEP_SUMMARY
-        fi
+        echo "## Regime-Aware Training Complete"
+        cat regime_strategy.json
