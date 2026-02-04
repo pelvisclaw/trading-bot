@@ -48,12 +48,12 @@ def main():
         results[pair] = {
             'fitness': result['fitness'],
             'trades': result['trades'],
-            'pnl': result['pnl'],
-            'sharpe': result['sharpe'],
-            'win_rate': result['win_rate'],
-            'max_drawdown': result['max_drawdown']
+            'pnl': result.get('pnl', 0),
+            'sharpe': result.get('sharpe', 0),
+            'win_rate': result.get('win_rate', 0),
+            'max_drawdown': result.get('max_drawdown', 0)
         }
-        print(f"{pair}: fitness={result['fitness']:.2f}, trades={result['trades']}, pnl={result['pnl']:.2f}%")
+        print(f"{pair}: fitness={result['fitness']:.2f}, trades={result['trades']}, pnl={result.get('pnl', 0):.2f}%")
     
     # Save results
     with open(args.output, 'w') as f:
