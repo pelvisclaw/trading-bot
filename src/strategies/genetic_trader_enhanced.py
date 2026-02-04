@@ -634,11 +634,11 @@ class GeneticTrader:
     """Main trading system - SOL Single Coin Mode (Optimized)"""
     def __init__(self, api_key: str = None, api_secret: str = None):
         self.kraken = KrakenAPI(api_key, api_secret)
-        self.ga = GeneticAlgorithm(population_size=50, mutation_rate=0.35)  # Larger pop, higher mutation
+        self.ga = GeneticAlgorithm(population_size=30, mutation_rate=0.35)  # Pop 30 for speed, mutation 0.35 for exploration
         self.best_strategy = None
         self.coin_pairs = ['SOLUSD']
     
-    def fetch_ohlc_multi(self, count: int = 200) -> Dict[str, List]:  # 200 candles for better training
+    def fetch_ohlc_multi(self, count: int = 100) -> Dict[str, List]:  # 100 candles for faster training
         """Fetch OHLC for SOL"""
         data = {}
         pair = 'SOLUSD'
