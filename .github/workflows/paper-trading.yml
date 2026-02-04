@@ -12,7 +12,6 @@ jobs:
     env:
       KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
       KRAKEN_PRIVATE_KEY: ${{ secrets.KRAKEN_PRIVATE_KEY }}
-      CAPITAL: ${{ secrets.PAPER_CAPITAL | default('10000') }}
       
     steps:
     - name: Checkout code
@@ -26,6 +25,11 @@ jobs:
     - name: Install dependencies
       run: pip install requests
     
+    - name: Get capital
+      id: capital
+      run: |
+        echo "value=${{ secrets.PAPER_CAPITAL || 10000 }}" >> $GITHUB_OUTPUT
+    
     - name: Run paper trader
       run: |
         echo "=== Regime Paper Trader ==="
@@ -33,7 +37,7 @@ jobs:
         python scripts/paper_trader_regime.py \
           --api-key "$KRAKEN_API_KEY" \
           --api-secret "$KRAKEN_PRIVATE_KEY" \
-          --capital $CAPITAL
+          --capital ${{ steps.capital.outputs.value }}
     
     - name: Upload trade log
       uses: actions/upload-artifact@v4
