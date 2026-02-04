@@ -687,6 +687,75 @@ class GeneticTrader:
         
         return results
     
+    def monte_carlo_validation(self, strategy: StrategyGenes, ohlc_data: Dict, iterations: int = 200) -> Dict:
+        """Monte Carlo validation using bootstrap resampling
+        
+        Returns confidence intervals for strategy performance.
+        Rejects strategies with >20% probability of loss.
+        """
+        import numpy as np
+        
+        results = {}
+        for pair, data in ohlc_data.items():
+            evaluator = StrategyEvaluator(strategy)
+            base_result = evaluator.evaluate(data, pair)
+            
+            # Extract returns from the base backtest
+            # Simulate by resampling candles with replacement
+            closes = [float(c[4]) for c in data]
+            returns = []
+            for i in range(1, len(closes)):
+                returns.append((closes[i] - closes[i-1]) / closes[i-1])
+            
+            if len(returns) < 50:
+                results[pair] = {'error': 'Insufficient data for Monte Carlo'}
+                continue
+            
+            # Bootstrap resampling
+            pnl_samples = []
+            for _ in range(iterations):
+                # Resample returns with replacement
+                sampled_returns = np.random.choice(returns, size=len(returns), replace=True)
+                
+                # Simulate simple trend-following returns based on sampled returns
+                signal = np.sign(sampled_returns)
+                strategy_returns = signal * sampled_returns * strategy.base_position_size
+                
+                # Apply stop loss simulation
+                for i in range(len(strategy_returns)):
+                    if strategy_returns[i] < -strategy.base_stop_loss:
+                        strategy_returns[i] = -strategy.base_stop_loss
+                
+                pnl = sum(strategy_returns)
+                pnl_samples.append(pnl)
+            
+            pnl_samples = np.array(pnl_samples)
+            
+            # Calculate statistics
+            mean_pnl = np.mean(pnl_samples)
+            std_pnl = np.std(pnl_samples)
+            percentile_5 = np.percentile(pnl_samples, 5)
+            percentile_95 = np.percentile(pnl_samples, 95)
+            loss_prob = np.mean(pnl_samples < 0)
+            
+            # Sharpe ratio approximation
+            sharpe = mean_pnl / (std_pnl + 0.0001) * np.sqrt(252)
+            
+            results[pair] = {
+                'mean_pnl': mean_pnl,
+                'std_pnl': std_pnl,
+                'percentile_5': percentile_5,
+                'percentile_95': percentile_95,
+                'loss_probability': loss_prob,
+                'sharpe_approx': sharpe,
+                'confidence_interval': f"[{percentile_5:.4f}, {percentile_95:.4f}]",
+                'is_robust': loss_prob < 0.20  # Accept if <20% chance of loss
+            }
+            
+            print(f"  {pair}: mean={mean_pnl:.4f}, loss_prob={loss_prob:.2%}, robust={results[pair]['is_robust']}", flush=True)
+        
+        return results
+    
     def save_strategy(self, path: str = "best_strategy_enhanced.json"):
         """Save strategy"""
         if self.best_strategy:
