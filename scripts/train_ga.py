@@ -40,7 +40,7 @@ def main():
     
     print(f"✅ Saved best strategy to {args.output}")
     print(f"📈 Best fitness: {best_fitness:.2f}")
-    print(f"🔧 Strategy genes: {json.dumps(vars(genes), indent=2)}")
+    print(f"🔧 Strategy genes: {json.dumps(genes.to_dict(), indent=2)}")
 
 if __name__ == '__main__':
     main()
