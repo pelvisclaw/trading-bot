@@ -1,9 +1,9 @@
 name: Train Regime-Aware Trading System
 
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
   schedule:
-    - cron: '0 */12 * * *'  # Every 12 hours (less frequent)
+    - cron: '0 */12 * * *'
   push:
     branches: [ main ]
     paths:
