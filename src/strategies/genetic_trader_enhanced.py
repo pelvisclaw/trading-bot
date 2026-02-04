@@ -659,8 +659,8 @@ class GeneticTrader:
         print(f"Training on {sum(len(d) for d in ohlc_data.values())} total candles...")
         self.best_strategy = self.ga.evolve(ohlc_data, generations)
         
-        print(f"\nBest strategy found (complexity: {self.best_strategy.complexity()}):")
-        print(json.dumps(self.best_strategy.to_dict(), indent=2, default=str))
+        print(f"\nBest strategy found (complexity: {self.best_strategy[2].complexity()}):")
+        print(json.dumps(self.best_strategy[2].to_dict(), indent=2, default=str))
         
         return self.best_strategy
     
@@ -758,6 +758,11 @@ class GeneticTrader:
     
     def save_strategy(self, path: str = "best_strategy_enhanced.json"):
         """Save strategy"""
+        def serialize(obj):
+            if hasattr(obj, 'to_dict'):
+                return obj.to_dict()
+            return str(obj)
+        
         if self.best_strategy:
             genes = self.best_strategy[2] if isinstance(self.best_strategy, tuple) else self.best_strategy
             with open(path, 'w') as f:
@@ -766,7 +771,7 @@ class GeneticTrader:
                     'fitness': self.best_strategy[0] if isinstance(self.best_strategy, tuple) else None,
                     'timestamp': datetime.now().isoformat(),
                     'ga_history': self.ga.history
-                }, f, indent=2, default=str)
+                }, f, indent=2, default=serialize)
             print(f"Strategy saved to {path}")
 
 
