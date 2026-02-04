@@ -117,10 +117,12 @@ class Indicators:
     
     @staticmethod
     def atr(highs: List[float], lows: List[float], closes: List[float], period: int = 14) -> float:
-        if len(closes) < period + 1:
-            return 0.01 * mean(closes)
+        if len(closes) < period + 1 or len(highs) < period or len(lows) < period:
+            return 0.01 * mean(closes[-period:] if len(closes) >= period else closes)
+        # Use matching lengths
+        n = min(len(highs), len(lows), len(closes) - 1)
         trs = []
-        for i in range(1, len(closes)):
+        for i in range(1, n):
             tr = max(
                 highs[i] - lows[i],
                 abs(highs[i] - closes[i-1]),
@@ -321,6 +323,7 @@ class Backtester:
     def __init__(self, api: KrakenAPI):
         self.api = api
         self.ensemble = EnsembleTrader()
+        self.config = StrategyConfig()
     
     def fetch_multi_timeframe(self, pair: str = "SOLUSD") -> Dict[int, List]:
         """Fetch OHLC for multiple timeframes"""
