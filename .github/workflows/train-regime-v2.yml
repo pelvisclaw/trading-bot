@@ -35,7 +35,7 @@ jobs:
       run: |
         python scripts/train_regime_v2.py \
           --api-key "$KRAKEN_API_KEY" \
-          --private-key "$KRAKEN_PRIVATE_KEY" \
+          --api-secret "$KRAKEN_PRIVATE_KEY" \
           --pair SOLUSD \
           --output regime_strategy_v2.json
     
