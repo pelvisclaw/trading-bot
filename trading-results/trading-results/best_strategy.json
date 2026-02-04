@@ -1,22 +1,22 @@
 {
   "strategy": "genetic_enhanced",
   "genes": {
-    "entry_ma_short": 9,
-    "entry_ma_long": 34,
-    "entry_rsi_oversold": 25.82862604331713,
-    "entry_rsi_overbought": 62.12463728944158,
+    "entry_ma_short": 19,
+    "entry_ma_long": 52,
+    "entry_rsi_oversold": 25.532309396434123,
+    "entry_rsi_overbought": 72.82892038242278,
     "require_vol_confirmation": false,
     "vol_multiplier": 1.5,
     "require_macd_confirm": false,
     "macd_crossover_required": false,
-    "exit_ma_short": 7,
-    "exit_ma_long": 15,
+    "exit_ma_short": 13,
+    "exit_ma_long": 27,
     "exit_rsi_threshold": 50.0,
-    "base_stop_loss": 0.0719932631424708,
-    "base_take_profit": 0.029467464761434484,
+    "base_stop_loss": 0.026319632092904575,
+    "base_take_profit": 0.04470131070790191,
     "atr_multiplier": 2.0,
     "use_atr_stops": true,
-    "base_position_size": 0.11228686592138074,
+    "base_position_size": 0.10848535901401135,
     "volatility_scaling": true,
     "vol_adaptive_factor": 0.5,
     "trade_start_hour": 0,
@@ -59,7 +59,7 @@
       0.3
     ]
   },
-  "fitness": 500.0,
+  "fitness": 3501.3126928237625,
   "pair": "SOLUSD",
   "candles": 2000
 }
