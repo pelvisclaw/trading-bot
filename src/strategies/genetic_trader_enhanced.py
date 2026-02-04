@@ -566,7 +566,7 @@ class GeneticAlgorithm:
             
             # Track best
             if not self.best_strategy or scores[0][0] > self.best_strategy[0]:
-                self.best_strategy = scores[0]
+                self.best_strategy = scores  # Keep tuple for comparison
             
             print(f"Gen {gen+1}: Best={scores[0][0]:.2f}, Trades={scores[0][1]}, Complexity={scores[0][2].complexity()}", flush=True)
             self.history.append({'gen': gen, 'best_fitness': scores[0][0]})
@@ -759,9 +759,10 @@ class GeneticTrader:
     def save_strategy(self, path: str = "best_strategy_enhanced.json"):
         """Save strategy"""
         if self.best_strategy:
+            genes = self.best_strategy[2] if isinstance(self.best_strategy, tuple) else self.best_strategy
             with open(path, 'w') as f:
                 json.dump({
-                    'genes': self.best_strategy.to_dict(),
+                    'genes': genes.to_dict(),
                     'fitness': self.best_strategy[0] if isinstance(self.best_strategy, tuple) else None,
                     'timestamp': datetime.now().isoformat(),
                     'ga_history': self.ga.history
