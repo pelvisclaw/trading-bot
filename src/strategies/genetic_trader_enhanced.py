@@ -226,8 +226,12 @@ class KrakenAPI:
                       'Content-Type': 'application/x-www-form-urlencoded'}
         if data and public:
             url += '?' + '&'.join(f"{k}={v}" for k, v in data.items())
-        response = self.session.get(url, headers=headers, timeout=10)
-        return response.json()
+        try:
+            response = self.session.get(url, headers=headers, timeout=5)
+            return response.json()
+        except Exception as e:
+            print(f"API request failed: {e}")
+            return {'error': str(e)}
     
     # Public endpoints
     def get_ohlc(self, pair: str = "XXBTZUSD", interval: int = 60, count: int = 500) -> Dict:
