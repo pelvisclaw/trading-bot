@@ -262,7 +262,7 @@ class RegimeTrainer:
                 train_regimes.append(regime['regime'])
             
             # Validate on test data
-            test_signals = []
+            test_regimes = []
             for i in range(len(test_closes)):
                 regime = RegimeDetector.detect(
                     train_closes + test_closes[:i+1],
