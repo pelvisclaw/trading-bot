@@ -433,25 +433,61 @@ class StrategyEvaluator:
                         trades.append({'pnl': pnl, 'reason': 'ma_crossover'})
                         position = None
         
-        # Calculate fitness
+        # Calculate fitness with transaction costs, slippage, and drawdown
         complexity_penalty = 0.01 * self.genes.complexity()
         
+        # Transaction costs (0.1% per trade)
+        transaction_cost = 0.001 * len(trades)
+        
+        # Apply slippage (0.05% per trade, simulated)
+        slippage = 0.0005 * len(trades)
+        
+        # Calculate drawdown
+        equity_curve = [1000.0]
+        for trade in trades:
+            equity_curve.append(equity_curve[-1] * (1 + trade['pnl']))
+        
+        max_equity = equity_curve[0]
+        max_drawdown = 0
+        for equity in equity_curve:
+            drawdown = (max_equity - equity) / max_equity
+            max_drawdown = max(max_drawdown, drawdown)
+            max_equity = max(max_equity, equity)
+        
+        # Calculate metrics
         if trades:
             returns = [t['pnl'] for t in trades]
             avg_return = sum(returns) / len(returns)
             variance = pvariance(returns) if len(returns) > 1 else 0
             sharpe = (avg_return * 252) / (variance ** 0.5 + 0.001) if variance > 0 else 0
             
-            # Fitness: reward positive returns + consistency
-            fitness = balance + (sharpe * 20) - (len(trades) * complexity_penalty)
+            # Win rate
+            wins = sum(1 for t in trades if t['pnl'] > 0)
+            win_rate = wins / len(trades)
+            
+            # Fitness: reward positive returns + consistency + heavy drawdown penalty
+            fitness = (
+                (balance - 1000) +                    # Raw P&L
+                (sharpe * 30) +                       # Risk-adjusted returns
+                (win_rate * 50) +                     # Consistency bonus
+                (len(trades) * 2) -                   # More trades = better exploration
+                (max_drawdown * 1000) -               # HEAVY drawdown penalty
+                (transaction_cost * 100) -             # Transaction cost penalty
+                (slippage * 100) -                     # Slippage penalty
+                (complexity_penalty * 10)              # Complexity penalty
+            )
         else:
-            fitness = 1000.0 - complexity_penalty
+            fitness = 1000.0 - complexity_penalty  # Penalty for no trades
         
         return {
             'fitness': fitness,
             'trades': len(trades),
             'pnl': (balance - 1000) / 10,  # % return
             'sharpe': sharpe if trades else 0,
+            'win_rate': win_rate if trades else 0,
+            'max_drawdown': max_drawdown,
+            'transaction_cost': transaction_cost,
+            'slippage': slippage,
             'complexity': self.genes.complexity()
         }
 
@@ -594,7 +630,7 @@ class GeneticTrader:
     """Main trading system - SOL Single Coin Mode (Optimized)"""
     def __init__(self, api_key: str = None, api_secret: str = None):
         self.kraken = KrakenAPI(api_key, api_secret)
-        self.ga = GeneticAlgorithm(population_size=8, mutation_rate=0.3)  # Smaller pop, higher mutation
+        self.ga = GeneticAlgorithm(population_size=30, mutation_rate=0.25)  # Larger pop, balanced mutation
         self.best_strategy = None
         self.coin_pairs = ['SOLUSD']
     
