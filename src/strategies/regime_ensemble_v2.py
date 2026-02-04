@@ -167,11 +167,11 @@ class TrendStrategy:
         trend_strength = regimes.get(60, {}).get('trend', 0)
         
         # Long signal: EMA 9 > EMA 21 > EMA 50 and uptrend confirmed
-        if ema9 > ema21 > ema50 and trend_regime in ['bull', 'sideways'] and trend_strength > 0:
+        if ema9 > ema21 > ema50 and trend_regime in ['bull', 'sideways'] and trend_strength > 0.005:
             return 'long'
         
         # Short signal: EMA 9 < EMA 21 < EMA 50 and downtrend confirmed
-        if ema9 < ema21 < ema50 and trend_regime in ['bear', 'sideways'] and trend_strength < 0:
+        if ema9 < ema21 < ema50 and trend_regime in ['bear', 'sideways'] and trend_strength < -0.005:
             return 'short'
         
         return 'neutral'
@@ -230,11 +230,11 @@ class MeanReversionStrategy:
         mr_regime = regimes.get(60, {}).get('regime', 'unknown')
         
         # Oversold = potential long (mean reversion up)
-        if rsi < 30 and mr_regime in ['sideways', 'mean_reversion', 'bull']:
+        if rsi < 35 and mr_regime in ['sideways', 'mean_reversion', 'bull']:
             return 'long'
         
         # Overbought = potential short (mean reversion down)
-        if rsi > 70 and mr_regime in ['sideways', 'mean_reversion', 'bear']:
+        if rsi > 65 and mr_regime in ['sideways', 'mean_reversion', 'bear']:
             return 'short'
         
         return 'neutral'
@@ -243,7 +243,7 @@ class MeanReversionStrategy:
 # ============ ENSEMBLE ============
 
 class EnsembleTrader:
-    """Ensemble of 3 specialized strategies with voting"""
+    """Ensemble of 3 specialized strategies with consensus voting"""
     
     def __init__(self):
         self.config = StrategyConfig()
@@ -254,14 +254,14 @@ class EnsembleTrader:
         ]
     
     def generate_signal(self, regimes: Dict[int, Dict], prices: Dict[int, List[float]]) -> str:
-        """Get signal from ensemble voting"""
+        """Get signal from consensus ensemble voting"""
         votes = {'long': 0, 'short': 0, 'neutral': 0}
         
         for strategy in self.strategies:
             signal = strategy.generate_signal(regimes, prices)
             votes[signal] += 1
         
-        # Return majority vote, require at least 2 agree
+        # Return majority vote (2+ agree)
         if votes['long'] >= 2:
             return 'long'
         if votes['short'] >= 2:
@@ -329,7 +329,7 @@ class Backtester:
         """Fetch OHLC for multiple timeframes"""
         data = {}
         for interval in [60, 240, 1440]:
-            result = self.api.get_ohlc(pair, interval, 500)
+            result = self.api.get_ohlc(pair, interval, 1000)  # Increased to 1000
             if 'result' in result and len(result['result']) > 1:
                 data[interval] = list(result['result'].values())[0]
         return data
