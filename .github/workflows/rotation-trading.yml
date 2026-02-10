@@ -1,0 +1,48 @@
+name: Rotation Trading
+
+on:
+  schedule:
+    # Run every 5 minutes - reliable cron via GitHub Actions
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    # Manual trigger button
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install krakenex python-dotenv
+      
+      - name: Run Rotation Trader
+        env:
+          KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
+          KRAKEN_API_SECRET: ${{ secrets.KRAKEN_API_SECRET }}
+          MODE: ${{ secrets.MODE || 'dry_run' }}
+        run: |
+          echo "=== $(date) ===" >> rotation_trading.log
+          if [ "$MODE" = "live" ]; then
+            python3 scripts/rotation_trader.py --api-key "$KRAKEN_API_KEY" --api-secret "$KRAKEN_API_SECRET" --live
+          else
+            python3 scripts/rotation_trader.py --api-key "$KRAKEN_API_KEY" --api-secret "$KRAKEN_API_SECRET"
+          fi
+        continue-on-error: true
+      
+      - name: Upload logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rotation-logs
+          path: rotation_trading.log
+          retention-days: 7
