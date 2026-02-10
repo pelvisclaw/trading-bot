@@ -33,6 +33,9 @@ jobs:
         run: |
           cd ${{ github.workspace }}
           export PYTHONPATH="${{ github.workspace }}/src:$PYTHONPATH"
+          echo "PYTHONPATH=$PYTHONPATH"
+          echo "Files in src:"
+          ls -la src/
           echo "=== $(date) ===" >> rotation_trading.log
           if [ "$MODE" = "live" ]; then
             python3 scripts/rotation_trader.py --api-key "$KRAKEN_API_KEY" --api-secret "$KRAKEN_API_SECRET" --live
