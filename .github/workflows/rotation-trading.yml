@@ -25,6 +25,12 @@ jobs:
         run: |
           pip install krakenex python-dotenv
       
+      - name: Debug - List files
+        run: |
+          pwd
+          ls -la
+          ls -la scripts/
+      
       - name: Run Rotation Trader
         env:
           KRAKEN_API_KEY: ${{ secrets.KRAKEN_API_KEY }}
